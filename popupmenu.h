@@ -6,8 +6,7 @@
 class QPushButton;
 class QWidget;
 
-class PopupMenu : public QMenu
-{
+class PopupMenu : public QMenu {
     Q_OBJECT
 public:
     explicit PopupMenu(QPushButton* button, QWidget* parent = 0);

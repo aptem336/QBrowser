@@ -6,10 +6,10 @@
 QT_BEGIN_NAMESPACE
 class QTextDocument;
 class QTextCharFormat;
+
 QT_END_NAMESPACE
 
-class HtmlHighLighter : public QSyntaxHighlighter
-{
+class HtmlHighLighter : public QSyntaxHighlighter {
     Q_OBJECT
 
 public:
@@ -20,16 +20,17 @@ protected:
 
 private:
     // Состояние подсветки, в которой находится текстовый блок на момент его закрытия
+
     enum States {
-        None,       // Без подсветки
-        Tag,        // Подсветка внутри тега
-        Comment,    // Внутри комментария
-        Quote       // Внутри кавычек, которые внутри тега
+        None, // Без подсветки
+        Tag, // Подсветка внутри тега
+        Comment, // Внутри комментария
+        Quote // Внутри кавычек, которые внутри тега
     };
 
     // Структура правил (шаблон + форматирование)
-    struct HighlightingRule
-    {
+
+    struct HighlightingRule {
         // Шаблон
         QRegExp pattern;
         // Форматирование

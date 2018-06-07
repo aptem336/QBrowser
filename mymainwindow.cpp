@@ -6,21 +6,19 @@
 #include <QNetworkReply>
 #include <QComboBox>
 #ifdef Q_OS_WIN32
-#define _WIN32_IE 0x0400
 #include <shlobj.h>
 #undef _WIN32_IE
 #endif
 #ifdef Q_OS_WIN
-#include <windows.h> // for Sleep
+#include <windows.h>
 #endif
 #include <popupmenu.h>
 
 // константа для названия окна браузера
 const QString MyMainWindow::browserName = QString("QBrowser");
 
-MyMainWindow::MyMainWindow(QWidget *parent): QWidget(parent) {
+MyMainWindow::MyMainWindow(QWidget *parent) : QWidget(parent) {
     progress = 0;
-
     setWindowIcon(QIcon(QStringLiteral(":web.png")));
     setWindowTitle(browserName);
 
@@ -28,12 +26,11 @@ MyMainWindow::MyMainWindow(QWidget *parent): QWidget(parent) {
     // 2. Добавляем рамку при наводке
     // 3. Убираем стрелочку для кнопки меню
     this->setStyleSheet("QPushButton::menu-indicator {"
-                            "image: url(myindicator.png);"
-                            "subcontrol-position: right center;"
-                            "subcontrol-origin: padding;"
-                            "left: -2px;"
-                        "}");
-
+            "image: url(myindicator.png);"
+            "subcontrol-position: right center;"
+            "subcontrol-origin: padding;"
+            "left: -2px;"
+            "}");
 
     prevButton = new QPushButton();
     prevButton->setIcon(QIcon(QStringLiteral(":back.png")));
@@ -69,7 +66,7 @@ MyMainWindow::MyMainWindow(QWidget *parent): QWidget(parent) {
     webView = new QWebView();
     openSettings();
     if ((settings->value("page/default")).isNull()) {
-        settings->setValue("page/default","https://xtenzq.github.io/");
+        settings->setValue("page/default", "https://google.com");
         // записываем несохраненные изменения
         settings->sync();
     }
@@ -77,21 +74,30 @@ MyMainWindow::MyMainWindow(QWidget *parent): QWidget(parent) {
     addressBar->setWebView(webView);
     // для правильности обработки клика по ссылке
     webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-
-    // Стартовая страница
-    webView->load(QUrl(settings->value("page/default").toString()));
     // Определяем поведение макета по умолчанию для виджета
-    webView->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    webView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+    tabsPanel = new TabPanel();
+    // Определяем поведение макета по умолчанию для виджета
+    tabsPanel->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+    tabsPanel->setStyleSheet("background: red;");
+    tabsPanel->setVisible(false);
+    //Панель с вкладками
+    mainPanel = new QTabWidget();
+    mainPanel->setTabPosition(QTabWidget::East);
+    mainPanel->addTab(webView, QIcon(QStringLiteral(":web.png")), "");
+    mainPanel->addTab(tabsPanel, QIcon(QStringLiteral(":menu.png")), "");
+    //TODO:добавить сигналы?
+    tabsPanel->showSlot();
+    connect(webView, SIGNAL(loadFinished(bool)), tabsPanel, SLOT(showSlot()));
+    connect(tabsPanel, SIGNAL(pushSignal(QUrl)), this, SLOT(linkClickedSlot(QUrl)));
+    connect(tabsPanel, SIGNAL(pushSignal(QUrl)), this, SLOT(showWebViewSlot()));
     // Сделал элемент, чтобы QMenu не вылезало за окно
     PopupMenu* mainMenu = new PopupMenu(menuButton, this);
 
-    //QMenu *mainMenu = new QMenu(menuButton);
-    //mainMenu->setLayoutDirection(Qt::RightToLeft);
-
-    QAction *settingsAction = new QAction(tr("Settings"),this);
+    QAction *settingsAction = new QAction(tr("Settings"), this);
     QAction *sourceAction = new QAction(tr("Source code"), this);
-    QAction *closeAction = new QAction(tr("Close"),this);
+    QAction *closeAction = new QAction(tr("Close"), this);
 
     mainMenu->addAction(settingsAction);
     mainMenu->addAction(sourceAction);
@@ -100,23 +106,17 @@ MyMainWindow::MyMainWindow(QWidget *parent): QWidget(parent) {
     // Устанавливаем нашему QPushButton'y меню
     menuButton->setMenu(mainMenu);
 
-
     QVBoxLayout *mainLayout = new QVBoxLayout();
     mainLayout->setMargin(0);
 
     QHBoxLayout *toolbarLayout = new QHBoxLayout();
-    toolbarLayout->setContentsMargins(5,5,5,5);
-
-    label1 = new QLabel();
-
-    //mainLayout->addWidget(menuBar);
+    toolbarLayout->setContentsMargins(5, 5, 5, 5);
 
     QVBoxLayout *innerLayout = new QVBoxLayout();
-    innerLayout->setContentsMargins(5,0,5,5);
+    innerLayout->setContentsMargins(5, 0, 5, 5);
 
     innerLayout->addLayout(toolbarLayout);
-    innerLayout->addWidget(webView);
-    innerLayout->addWidget(label1);
+    innerLayout->addWidget(mainPanel);
     mainLayout->addLayout(innerLayout);
 
     toolbarLayout->addWidget(prevButton);
@@ -129,43 +129,35 @@ MyMainWindow::MyMainWindow(QWidget *parent): QWidget(parent) {
 
     setLayout(mainLayout);
 
-    // Сигналы для прогресс-бара адресной строки
-    connect(webView, SIGNAL(loadFinished(bool)), SLOT(adjustLocation()));
-    // connect(webView, SIGNAL(loadProgress(int)), SLOT(adjustOnProgress()));
     // Сигнал, устанавливающий значение прогресса загрузки страницы, который впоследствие передается в addressBar для отрисовки прогресса
     connect(webView, SIGNAL(loadProgress(int)), SLOT(setProgress(int)));
-    connect(webView, SIGNAL(loadFinished(bool)), SLOT(finishLoading(bool)));
 
     // По энтеру переходим по ссылке
-    connect(addressBar, SIGNAL(returnPressed()),this,SLOT(goButtonClickedSlot()));
+    connect(addressBar, SIGNAL(returnPressed()), this, SLOT(goButtonClickedSlot()));
 
     // Переход по ссылке
-    connect(webView, SIGNAL(linkClicked(QUrl)),this,SLOT(linkClickedSlot(QUrl)));
+    connect(webView, SIGNAL(linkClicked(QUrl)), this, SLOT(linkClickedSlot(QUrl)));
     // Изменение заголовка
-    connect(webView, SIGNAL(titleChanged(QString)),this,SLOT(titleChangedSlot(QString)));
-    connect(webView, SIGNAL(urlChanged(QUrl)),this,SLOT(urlChangedSlot(QUrl)));
-    connect(webView, SIGNAL(loadFinished(bool)),this,SLOT(loadFinishedSlot(bool)));
+    connect(webView, SIGNAL(titleChanged(QString)), this, SLOT(titleChangedSlot(QString)));
+    connect(webView, SIGNAL(urlChanged(QUrl)), this, SLOT(urlChangedSlot(QUrl)));
 
-    connect(webView, SIGNAL(loadStarted()),this,SLOT(loadStartedSlot()));
+    connect(webView, SIGNAL(loadStarted()), this, SLOT(loadStartedSlot()));
+    connect(webView, SIGNAL(loadFinished(bool)), this, SLOT(loadFinishedSlot()));
 
-    connect(prevButton,SIGNAL(clicked(bool)),this,SLOT(prevButtonClickedSlot()));
-    connect(nextButton,SIGNAL(clicked(bool)),this,SLOT(nextButtonClickedSlot()));
-    connect(refreshButton,SIGNAL(clicked(bool)),this,SLOT(refreshButtonClickedSlot()));
-    connect(stopButton,SIGNAL(clicked(bool)),this,SLOT(stopButtonClickedSlot()));
-    connect(homeButton,SIGNAL(clicked(bool)),this,SLOT(homeButtonClickedSlot()));
+    connect(prevButton, SIGNAL(clicked(bool)), this, SLOT(prevButtonClickedSlot()));
+    connect(nextButton, SIGNAL(clicked(bool)), this, SLOT(nextButtonClickedSlot()));
+    connect(refreshButton, SIGNAL(clicked(bool)), this, SLOT(refreshButtonClickedSlot()));
+    connect(stopButton, SIGNAL(clicked(bool)), this, SLOT(stopButtonClickedSlot()));
+    connect(homeButton, SIGNAL(clicked(bool)), this, SLOT(homeButtonClickedSlot()));
 
-    connect(settingsAction,SIGNAL(triggered(bool)),this,SLOT(settingsClickedSlot()));
-    connect(sourceAction,SIGNAL(triggered(bool)),this,SLOT(viewSource()));
-    connect(closeAction,SIGNAL(triggered(bool)),this,SLOT(closeClickedSlot()));
+    connect(settingsAction, SIGNAL(triggered(bool)), this, SLOT(settingsClickedSlot()));
+    connect(sourceAction, SIGNAL(triggered(bool)), this, SLOT(viewSource()));
+    connect(closeAction, SIGNAL(triggered(bool)), this, SLOT(closeClickedSlot()));
 
-    //connect(menuButton,SIGNAL(clicked(bool)),this,SLOT(viewSource()));
-
-
+    webView->load(QUrl(settings->value("page/default").toString()));
 }
 
-MyMainWindow::~MyMainWindow() {
-
-}
+MyMainWindow::~MyMainWindow() {}
 
 /**
  * @brief MyWidget::openSettings Инициализирует настройки
@@ -173,8 +165,8 @@ MyMainWindow::~MyMainWindow() {
 void MyMainWindow::openSettings() {
     QString settingsPath = "./";
 
-// ifdef Q_OS_WIN32 - условная компиляция (компилятор распознает ось)
-// под линухом не заработает, это да
+    // ifdef Q_OS_WIN32 - условная компиляция (компилятор распознает ось)
+    // под линухом не заработает, это да
 #ifdef Q_OS_WIN32
     // В commonAppDataPath будет храниться путь к системной папке с данными программ ProgramData
     wchar_t commonAppDataPath[MAX_PATH];
@@ -186,12 +178,12 @@ void MyMainWindow::openSettings() {
     // Третий аргумент - CSIDL, идентифицирующий интересующую папку
     // Четвёртый аргумент - указывает, должна ли создаваться папка, если она не существует
     if (SHGetSpecialFolderPath(0, commonAppDataPath, CSIDL_COMMON_APPDATA, FALSE)) {
-       settingsPath = QString::fromWCharArray(commonAppDataPath)+QDir::separator()+
-               "QBrowser"+QDir::separator();
-       if (!QDir(settingsPath).exists()) {
-           QDir(QString::fromWCharArray(commonAppDataPath)).mkpath(settingsPath);
-           }
-       }
+        settingsPath = QString::fromWCharArray(commonAppDataPath) + QDir::separator() +
+                "QBrowser" + QDir::separator();
+        if (!QDir(settingsPath).exists()) {
+            QDir(QString::fromWCharArray(commonAppDataPath)).mkpath(settingsPath);
+        }
+    }
 #endif
 
     /**
@@ -206,41 +198,43 @@ void MyMainWindow::openSettings() {
      *   password=student
      *
      *   [page]
-     *   default=http://www.google.ru
+     *   default=https://google.com
      *
      */
 
-    // инициализируем настройки
-     settings = new QSettings(settingsPath+"settings.ini",QSettings::IniFormat,this);
-     loadSettings();
+    //инициализируем настройки
+    settings = new QSettings(settingsPath + "settings.ini", QSettings::IniFormat, this);
+    loadSettings();
 }
 
 /**
- * @brief MyWidget::loadSettings Считывает настройки для прокси
+ * @brief MyWidget::Settings Считывает настройки для прокси
  */
 void MyMainWindow::loadSettings() {
-     if (settings->value("proxy/useproxy").toBool()) {
+    if (settings->value("proxy/useproxy").toBool()) {
         webView->page()->networkAccessManager()->setProxy(QNetworkProxy(QNetworkProxy::HttpProxy,
-                                                          settings->value("proxy/host").toString(),
-                                                          settings->value("proxy/port").toInt(),
-                                                          settings->value("proxy/user").toString(),
-                                                          settings->value("proxy/password").toString()));
-        }
-     else {
-          webView->page()->networkAccessManager()->setProxy(QNetworkProxy(QNetworkProxy::NoProxy));
-     }
+                settings->value("proxy/host").toString(),
+                settings->value("proxy/port").toInt(),
+                settings->value("proxy/user").toString(),
+                settings->value("proxy/password").toString()));
+    } else {
+        webView->page()->networkAccessManager()->setProxy(QNetworkProxy(QNetworkProxy::NoProxy));
+    }
 }
 
 /**
  * @brief MyWidget::goButtonClickedSlot Дописывает префикс и переходит по ссылке
  */
 void MyMainWindow::goButtonClickedSlot() {
-     QString addr = addressBar->text();
-     //addressBar->setFavIcon(QIcon(QStringLiteral(":defaultIcon.png")));
-     if (!(addr.startsWith("http://") || addr.startsWith("https://"))) {
-         addr = "http://"+addr;
-        }
-     webView->load(addr);
+    QString addr = addressBar->text();
+    QRegExp reg("(?:(?:https?|ftp|telnet)://(?:[a-z0-9_-]{1,32}(?::[a-z0-9_-]{1,32})?@)?)?(?:(?:[a-z0-9-]{1,128}.)+(?:ru|su|com|net|org|mil|edu|arpa|gov|biz|info|aero|inc|name|[a-z]{2})|(?!0)(?:(?!0[^.]|255)[0-9]{1,3}.){3}(?!0|255)[0-9]{1,3})(?:/[a-z0-9.,_@%&?+=~/-]*)?(?:#[^ '\"&]*)?");
+    if (!reg.exactMatch(addr)) {
+        addr = "https://www.google.ru/search?q=" + addr + "&oq=" + addr + "&ie=UTF-8";
+    }
+    if (!(addr.startsWith("http://") || addr.startsWith("https://"))) {
+        addr = "http://" + addr;
+    }
+    webView->load(QUrl(addr));
 }
 
 /**
@@ -248,8 +242,7 @@ void MyMainWindow::goButtonClickedSlot() {
  * @param url адрес сайта
  */
 void MyMainWindow::linkClickedSlot(QUrl url) {
-    //addressBar->setFavIcon(QIcon(QStringLiteral(":defaultIcon.png")));
-     webView->load(url);
+    webView->load(url);
 }
 
 /**
@@ -257,70 +250,102 @@ void MyMainWindow::linkClickedSlot(QUrl url) {
  * @param url адрес сайта
  */
 void MyMainWindow::urlChangedSlot(QUrl url) {
-     // Устанавливаем текст, подгружаем иконки
-     addressBar->setDeafultIcon();
-     addressBar->setText(url.toString());
-     // Включаем кнопки вперед/назад
-     prevButton->setEnabled(webView->history()->canGoBack());
-     nextButton->setEnabled(webView->history()->canGoForward());
-}
-void MyMainWindow::titleChangedSlot(QString title) {
-     if (title.length() > 0) {
-         title = " :: "+title;
-        }
-     this->title = title;
-     title = browserName+" "+title;
-     setWindowTitle(title);
+    // Устанавливаем текст, подгружаем иконки
+    addressBar->setDeafultIcon();
+    addressBar->setText(url.toString());
+    // Включаем кнопки вперед/назад
+    prevButton->setEnabled(webView->history()->canGoBack());
+    nextButton->setEnabled(webView->history()->canGoForward());
 }
 
-/**
- * @brief MyWidget::loadFinishedSlot Включает/выключает кнопки
-void MyWidget::loadFinishedSlot(bool) {
-     refreshButton->setEnabled(true);
-     stopButton->setEnabled(false);
+void MyMainWindow::titleChangedSlot(QString title) {
+    if (title.length() > 0) {
+        title = " :: " + title;
+    }
+    this->title = title;
+    title = browserName + " " + title;
+    setWindowTitle(title);
 }
 
 /**
  * @brief MyWidget::loadStartedSlot Включает кнопки
  */
 void MyMainWindow::loadStartedSlot() {
-     refreshButton->setEnabled(true);
-     stopButton->setEnabled(true);
+    refreshButton->setEnabled(true);
+    stopButton->setEnabled(true);
+}
+/**
+ * @brief MyWidget::loadFinishedSlot Включает кнопки
+ */
+void MyMainWindow::loadFinishedSlot() {
+    QFile *hfile = new QFile("history");
+    QStringList names;
+    QStringList urls;
+    QList<int> counts;
+    if (hfile->open(QIODevice::ReadOnly)) {
+        QString site_title = webView->title();
+        QDataStream read(hfile);
+        read>>names;
+        read>>urls;
+        read>>counts;
+        if (names.contains(site_title)){
+            counts[names.indexOf(site_title)]+=1;
+        } else {
+            names.append(site_title);
+            urls.append(webView->url().toString());
+            counts.append(1);
+        }
+        hfile->close();
+    }
+    if (hfile->open(QIODevice::WriteOnly)) {
+        QDataStream write(hfile);
+        write<<names;
+        write<<urls;
+        write<<counts;
+        hfile->close();
+    }
+//    qDebug()<<names;
+//    qDebug()<<urls;
+//    qDebug()<<counts;
+    stopButton->setEnabled(false);
+}
+void MyMainWindow::showWebViewSlot(){
+    mainPanel->setCurrentIndex(0);
 }
 
 /**
  * @brief MyWidget::prevButtonClickedSlot Переходит на предыдущую страницу в истории
  */
 void MyMainWindow::prevButtonClickedSlot() {
-     webView->back();
+    webView->back();
 }
 
 /**
  * @brief MyWidget::nextButtonClickedSlot Переходит на следующую страницу в истории
  */
 void MyMainWindow::nextButtonClickedSlot() {
-     webView->forward();
+    webView->forward();
 }
 
 /**
  * @brief MyWidget::refreshButtonClickedSlot Перезагружает страницу
  */
 void MyMainWindow::refreshButtonClickedSlot() {
-     webView->reload();
+    webView->reload();
 }
 
 /**
  * @brief MyWidget::stopButtonClickedSlot Останавливает загрузку страницы
  */
 void MyMainWindow::stopButtonClickedSlot() {
-     webView->stop();
+    webView->stop();
 }
 
 /**
  * @brief MyWidget::closeClickedSlot Закрывает приложение
  */
 void MyMainWindow::closeClickedSlot() {
-     close();
+    close();
 }
 
 /**
@@ -350,7 +375,7 @@ void MyMainWindow::viewSource() {
  */
 void MyMainWindow::slotSourceDownloaded() {
     //
-    QNetworkReply* reply = qobject_cast<QNetworkReply*>(const_cast<QObject*>(sender()));
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(const_cast<QObject*> (sender()));
 
     QDialog* myDialog = new QDialog();
 
@@ -368,8 +393,7 @@ void MyMainWindow::slotSourceDownloaded() {
     myDialog->setLayout(dialogLayout);
 
     textEdit->setAttribute(Qt::WA_DeleteOnClose);
-    // Считываем все оставшиеся данные
-    // и преобразуем текст TextEdit в текст строки
+    // Считываем все оставшиеся данные и преобразуем текст TextEdit в текст строки
     textEdit->setPlainText(reply->readAll());
 
     // Обрабатываем его хайлатером
@@ -379,16 +403,14 @@ void MyMainWindow::slotSourceDownloaded() {
     myDialog->show();
     reply->deleteLater();
 }
-/*!
-  */
 
 /*!
  * \brief MyWidget::settingsClickedSlot Открывает окно настроек
  */
 void MyMainWindow::settingsClickedSlot() {
-     MySettings *dialog = new MySettings(settings, this);
-     dialog->show();
-     connect(dialog,SIGNAL(settingsChanged()),this,SLOT(loadSettings()));
+    MySettings *dialog = new MySettings(settings, this);
+    dialog->show();
+    connect(dialog, SIGNAL(settingsChanged()), this, SLOT(loadSettings()));
 }
 
 /**
@@ -399,10 +421,8 @@ void MyMainWindow::adjustOnProgress() {
         addressBar->setDeafultIcon();
         setWindowTitle(browserName + " :: " + webView->title());
         addressBar->setValue(0);
-    }
-    else {
+    } else {
         setWindowTitle(QString("%1 (%2%)").arg(browserName + " :: " + webView->title()).arg(progress));
-        addressBar->setLoadingIcon();
         addressBar->setValue(progress);
     }
 }

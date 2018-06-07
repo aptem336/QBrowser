@@ -7,12 +7,11 @@
 
 class QToolButton;
 
-class UrlLineEdit : public QLineEdit
-{
+class UrlLineEdit : public QLineEdit {
     Q_OBJECT
 
 public:
-    UrlLineEdit(QWidget *parent = nullptr); 
+    UrlLineEdit(QWidget *parent = nullptr);
     void setWebView(QWebView *webView);
 
 public:
@@ -23,8 +22,6 @@ public:
     QMovie *movie;
 
     void setValue(int setValue);
-
-    void setLoadingIcon();
     void setDeafultIcon();
 
 protected:
@@ -34,8 +31,6 @@ protected:
 private:
     QToolButton *m_favButton;
     QToolButton *m_clearButton;
-
-    QLinearGradient generateGradient(const QColor &color) const;
     QWebView *m_webView;
     QColor m_defaultBaseColor;
 

@@ -3,9 +3,8 @@
 #include <QSettings>
 #include <QtWidgets>
 
-class MySettings : public QDialog
-{
-        Q_OBJECT
+class MySettings : public QDialog {
+    Q_OBJECT
 public:
     MySettings(QSettings *mysettings, QWidget *parent);
 private:

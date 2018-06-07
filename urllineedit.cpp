@@ -13,17 +13,16 @@
  * \param parent QWidget
  */
 UrlLineEdit::UrlLineEdit(QWidget *parent)
-    : QLineEdit(parent),
-      //
-      m_favButton(new QToolButton(this)),
-      m_clearButton(new QToolButton(this))
-{
+: QLineEdit(parent),
+//
+m_favButton(new QToolButton(this)),
+m_clearButton(new QToolButton(this)) {
     /*
-    * Возможности:
-    * 1. Отображение загрузки страницы как при помощи иконки, так и при помощи progressbar
-    * 2. Кнопка очищения адресной строки
-    * 3. Если соединение защищено (SSL), устанавливается иконка замка
-    */
+     * Возможности:
+     * 1. Отображение загрузки страницы при помощи progressbar
+     * 2. Кнопка очищения адресной строки
+     * 3. Если соединение защищено (SSL), устанавливается иконка замка
+     */
     setFocusPolicy(this->focusPolicy());
     setAttribute(Qt::WA_InputMethodEnabled);
     setSizePolicy(this->sizePolicy());
@@ -43,28 +42,18 @@ UrlLineEdit::UrlLineEdit(QWidget *parent)
     m_clearButton->setStyleSheet(style);
     m_favButton->setStyleSheet(style);
     setStyleSheet(QStringLiteral("QLineEdit { padding-left: %1px; padding-right: %2px; padding-top: 5px; padding-bottom: 5px; } ")
-                  .arg(m_clearButton->sizeHint().width())
-                  .arg(m_favButton->sizeHint().width()));
+            .arg(m_clearButton->sizeHint().width())
+            .arg(m_favButton->sizeHint().width()));
     int minIconHeight = qMax(m_favButton->sizeHint().height(), m_clearButton->sizeHint().height());
     setMinimumSize(minimumSizeHint().width() +
-                   m_favButton->sizeHint().width() +
-                   m_clearButton->sizeHint().width(),
-                   qMax(minimumSizeHint().height(), minIconHeight));
+            m_favButton->sizeHint().width() +
+            m_clearButton->sizeHint().width(),
+            qMax(minimumSizeHint().height(), minIconHeight));
 
     connect(m_clearButton, &QToolButton::clicked, this, &QLineEdit::clear);
-    connect(this, &QLineEdit::textChanged, [this](const QString &text) {
+    connect(this, &QLineEdit::textChanged, [this](const QString & text) {
         m_clearButton->setVisible(!text.isEmpty() && !isReadOnly());
     });
-
-    // Реализуем анимированную иконки для индикации загрузки страницы
-    movie = new QMovie(":load.gif");
-    // Будем устанавливать иконку по сигналу frameChanged
-    connect(movie,SIGNAL(frameChanged(int)),this,SLOT(setLoadingIcon(int)));
-    // Для того, чтобы заставить гифку вращаться бесконечно, сделаем бесконечный цикл
-    if (movie->loopCount() != -1)
-        // и по мере завершения проигрывания анимации будем крутить ее снова
-        connect(movie,SIGNAL(finished()),movie,SLOT(start()));
-    movie->start();
 }
 
 /*!
@@ -72,11 +61,7 @@ UrlLineEdit::UrlLineEdit(QWidget *parent)
  * \param webView
  */
 void UrlLineEdit::setWebView(QWebView *webView) {
-    // Ассерт для отладки, как-нибудь удалю
-    Q_ASSERT(!m_webView);
     m_webView = webView;
-    //connect(webView, SIGNAL(urlChanged(QUrl)), this, SLOT(webViewUrlChanged(QUrl)));
-    //connect(webView, SIGNAL(iconChanged(QIcon)), this, SLOT(webViewIconChanged(QIcon)));
     // Обновляем по мере прогресса
     connect(webView, SIGNAL(loadProgress(int)), this, SLOT(update()));
 }
@@ -88,18 +73,6 @@ void UrlLineEdit::setWebView(QWebView *webView) {
 void UrlLineEdit::paintEvent(QPaintEvent *e) {
     // В начале - отрисовываем сам элемент QLineEdit
     QLineEdit::paintEvent(e);
-
-    /* Сначала хотел вместо иконки красить всю адресную строку в желтый цвет
-    QPalette p = palette();
-    if (m_webView && m_webView->url().scheme() == QLatin1String("https")) {
-        QColor lightYellow(248, 248, 210);
-        p.setBrush(QPalette::Base, generateGradient(lightYellow));
-    } else {
-        p.setBrush(QPalette::Base, palette().color(QPalette::Base));
-    }
-    setPalette(p);
-    */
-
     QPainter painter(this);
     QStyleOptionFrame panel;
     initStyleOption(&panel);
@@ -109,19 +82,15 @@ void UrlLineEdit::paintEvent(QPaintEvent *e) {
         int progress = value;
         // Отрисовываем сам прогрессбар
         // Устанавливаем ему цвет
-        QColor loadingColor = QColor(46, 204, 113);
-        painter.setBrush(generateGradient(loadingColor));
+        QColor loadingColor = QColor(0x9a,0xc1,0x6c,0x66);
+        painter.setBrush(loadingColor);
         // Границы делаем прозрачными
         painter.setPen(Qt::transparent);
         // Ширина - в зависимости от процесса загрузки
         int mid = (backgroundRect.width() + 50) / 100.0f * progress;
+        //QRect progressRect(backgroundRect.x() - 25, backgroundRect.y() + backgroundRect.height(), mid, backgroundRect.height() / 2);
         QRect progressRect(backgroundRect.x() - 25, backgroundRect.y() - 5, mid, backgroundRect.height() + 10);
         painter.drawRect(progressRect);
-        // Так как элемент перерисовывается и ссылки видно не будет, перерисовываем текст поверх прогрессбара
-        painter.setPen(Qt::black);
-        // Отрисовываем текст поверх прогресса
-        QRect newQR(backgroundRect.x() + 2, backgroundRect.y() + 1, mid, backgroundRect.height());
-        painter.drawText(newQR, url().toString());
     }
 }
 
@@ -136,32 +105,9 @@ void UrlLineEdit::resizeEvent(QResizeEvent *event) {
     // (для себя) sizeHint() - определяет рекомендованный размер для виджета
     QSize clearButtonSize = m_clearButton->sizeHint();
     // Перемещаем кнопку очищения адресной строки
-    m_clearButton->move(rect().right() - clearButtonSize.width(),
-                        (rect().bottom() - clearButtonSize.height()) / 2);
+    m_clearButton->move(rect().right() - clearButtonSize.width(), (rect().bottom() - clearButtonSize.height()) / 2);
     // Перемещаем favIcon
     m_favButton->move(rect().left(), (rect().bottom() - m_favButton->sizeHint().height()) / 2);
-}
-
-/*!
- * \brief UrlLineEdit::generateGradient Генерирует верхний/нижний градиент для заданного цвета
- * \param color заданный цвет прогресса адресной строки
- * \return градиент
- */
-QLinearGradient UrlLineEdit::generateGradient(const QColor &color) const {
-    QLinearGradient gradient(0, 0, 0, height());
-    gradient.setColorAt(0, m_defaultBaseColor);
-    gradient.setColorAt(0.15, color.lighter(120));
-    gradient.setColorAt(0.5, color);
-    gradient.setColorAt(0.85, color.lighter(120));
-    gradient.setColorAt(1, m_defaultBaseColor);
-    return gradient;
-}
-
-/**
- * @brief UrlLineEdit::setLoadingIcon Устанавливает иконку загрузки страницы
- */
-void UrlLineEdit::setLoadingIcon() {
-    setFavIcon(QIcon(movie->currentPixmap()));
 }
 
 /**
@@ -174,7 +120,6 @@ void UrlLineEdit::setDeafultIcon() {
     } else {
         setFavIcon(QIcon(QStringLiteral(":notssl.png")));
     }
-
 }
 
 /**
@@ -201,7 +146,7 @@ void UrlLineEdit::setUrl(const QUrl &url) {
  * \param icon
  */
 void UrlLineEdit::setFavIcon(const QIcon &icon) {
-    QPixmap pixmap = icon.pixmap(16, 16);
+    QPixmap pixmap = icon.pixmap(20, 20);
     m_favButton->setIcon(pixmap);
 }
 

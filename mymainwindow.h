@@ -6,10 +6,9 @@
 #include <QtWebKitWidgets>
 #include <urllineedit.h>
 #include <htmlhighlighter.h>
-#include <myhomepage.h>
+#include <tabpanel.h>
 
-class MyMainWindow : public QWidget
-{
+class MyMainWindow : public QWidget {
     Q_OBJECT
 
 public:
@@ -27,12 +26,12 @@ private slots:
     void refreshButtonClickedSlot();
     void stopButtonClickedSlot();
     void loadStartedSlot();
+    void loadFinishedSlot();
+    void showWebViewSlot();
     void homeButtonClickedSlot();
-
     void closeClickedSlot();
     void settingsClickedSlot();
     void loadSettings();
-
     void adjustOnProgress();
     void setProgress(int p);
 
@@ -42,8 +41,6 @@ protected slots:
 
 
 private:
-    // Вкладки
-    QTabWidget *tabWidget;
     // Кнопки
     QPushButton *prevButton;
     QPushButton *nextButton;
@@ -56,10 +53,9 @@ private:
     QPushButton *showBookmarks;
     //
     UrlLineEdit *addressBar;
+    QTabWidget *mainPanel;
     QWebView *webView;
-    QLabel *label1;
-
-    MyHomepage *dialog;
+    TabPanel *tabsPanel;
 
     QSettings *settings;
     void openSettings();

@@ -1,6 +1,6 @@
 #include "mysettings.h"
 
-MySettings::MySettings(QSettings *mysettings, QWidget *parent=0):QDialog(parent) {
+MySettings::MySettings(QSettings *mysettings, QWidget *parent = 0) : QDialog(parent) {
     settings = mysettings;
     setModal(true);
     setWindowTitle(tr("Browser settings"));
@@ -18,10 +18,10 @@ MySettings::MySettings(QSettings *mysettings, QWidget *parent=0):QDialog(parent)
 
     // Валидатор IP-адреса
     QString ipRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";
-    QRegExp ipRegex ("^" + ipRange
-                     + "\\." + ipRange
-                     + "\\." + ipRange
-                     + "\\." + ipRange + "$");
+    QRegExp ipRegex("^" + ipRange
+            + "\\." + ipRange
+            + "\\." + ipRange
+            + "\\." + ipRange + "$");
     QRegExpValidator *ipValidator = new QRegExpValidator(ipRegex, this);
     hostnameEdit->setValidator(ipValidator);
 
@@ -31,24 +31,24 @@ MySettings::MySettings(QSettings *mysettings, QWidget *parent=0):QDialog(parent)
 
     QGridLayout *mainLayout = new QGridLayout();
 
-    mainLayout->addWidget(new QLabel(tr("Host")),0,0);
-    mainLayout->addWidget(new QLabel(tr("Port")),1,0);
-    mainLayout->addWidget(new QLabel(tr("Username")),2,0);
-    mainLayout->addWidget(new QLabel(tr("Password")),3,0);
-    mainLayout->addWidget(new QLabel(tr("Proxy enabled")),4,0);
-    mainLayout->addWidget(new QLabel(tr("Homepage")),5,0);
-    mainLayout->addWidget(new QLabel(tr("Default")),6,0);
+    mainLayout->addWidget(new QLabel(tr("Host")), 0, 0);
+    mainLayout->addWidget(new QLabel(tr("Port")), 1, 0);
+    mainLayout->addWidget(new QLabel(tr("Username")), 2, 0);
+    mainLayout->addWidget(new QLabel(tr("Password")), 3, 0);
+    mainLayout->addWidget(new QLabel(tr("Proxy enabled")), 4, 0);
+    mainLayout->addWidget(new QLabel(tr("Homepage")), 5, 0);
+    mainLayout->addWidget(new QLabel(tr("Default")), 6, 0);
 
-    mainLayout->addWidget(hostnameEdit,0,1);
-    mainLayout->addWidget(portEdit,1,1);
-    mainLayout->addWidget(userNameEdit,2,1);
-    mainLayout->addWidget(passwordEdit,3,1);
-    mainLayout->addWidget(useProxyBox,4,1);
-    mainLayout->addWidget(startpageEdit,5,1);
-    mainLayout->addWidget(useDefaultBox,6,1);
+    mainLayout->addWidget(hostnameEdit, 0, 1);
+    mainLayout->addWidget(portEdit, 1, 1);
+    mainLayout->addWidget(userNameEdit, 2, 1);
+    mainLayout->addWidget(passwordEdit, 3, 1);
+    mainLayout->addWidget(useProxyBox, 4, 1);
+    mainLayout->addWidget(startpageEdit, 5, 1);
+    mainLayout->addWidget(useDefaultBox, 6, 1);
 
-    mainLayout->addWidget(okButton,7,0);
-    mainLayout->addWidget(cancelButton,7,1);
+    mainLayout->addWidget(okButton, 7, 0);
+    mainLayout->addWidget(cancelButton, 7, 1);
 
     setLayout(mainLayout);
 
@@ -57,8 +57,8 @@ MySettings::MySettings(QSettings *mysettings, QWidget *parent=0):QDialog(parent)
     userNameEdit->setEnabled(false);
     passwordEdit->setEnabled(false);
 
-    connect(okButton,SIGNAL(clicked(bool)),this,SLOT(okClicked()));
-    connect(cancelButton,SIGNAL(clicked(bool)),this,SLOT(cancelClicked()));
+    connect(okButton, SIGNAL(clicked(bool)), this, SLOT(okClicked()));
+    connect(cancelButton, SIGNAL(clicked(bool)), this, SLOT(cancelClicked()));
 
     connect(useProxyBox, SIGNAL(clicked(bool)), this, SLOT(manageButtonsEnabled(bool)));
     connect(useDefaultBox, SIGNAL(clicked(bool)), this, SLOT(defaultClicked(bool)));
@@ -70,7 +70,7 @@ MySettings::MySettings(QSettings *mysettings, QWidget *parent=0):QDialog(parent)
     passwordEdit->setText(settings->value("proxy/password").toString());
     startpageEdit->setText(settings->value("page/default").toString());
 
-    this->setFixedSize(QSize(300,300));
+    this->setFixedSize(QSize(300, 300));
 
 }
 
@@ -82,34 +82,37 @@ void MySettings::manageButtonsEnabled(bool flag) {
 }
 
 void MySettings::okClicked() {
+    QRegExp reg("(?:(?:https?|ftp|telnet)://(?:[a-z0-9_-]{1,32}(?::[a-z0-9_-]{1,32})?@)?)?(?:(?:[a-z0-9-]{1,128}.)+(?:ru|su|com|net|org|mil|edu|arpa|gov|biz|info|aero|inc|name|[a-z]{2})|(?!0)(?:(?!0[^.]|255)[0-9]{1,3}.){3}(?!0|255)[0-9]{1,3})(?:/[a-z0-9.,_@%&?+=~/-]*)?(?:#[^ '\"&]*)?");
+    if (!reg.exactMatch(startpageEdit->text())) {
+        startpageEdit->setText("https://google.com");
+    }
     if (!(startpageEdit->text().startsWith("http://") || startpageEdit->text().startsWith("https://"))) {
-        startpageEdit->setText("http://"+startpageEdit->text());
-     }
-     settings->setValue("proxy/useproxy",useProxyBox->isChecked());
-     settings->setValue("proxy/host",hostnameEdit->text());
-     settings->setValue("proxy/port",portEdit->text());
-     settings->setValue("proxy/user",userNameEdit->text());
-     settings->setValue("proxy/password",passwordEdit->text());
-     settings->setValue("page/default",startpageEdit->text());
-     settings->sync();
-     emit settingsChanged();
-     close();
+        startpageEdit->setText("http://" + startpageEdit->text());
+    }
+    settings->setValue("proxy/useproxy", useProxyBox->isChecked());
+    settings->setValue("proxy/host", hostnameEdit->text());
+    settings->setValue("proxy/port", portEdit->text());
+    settings->setValue("proxy/user", userNameEdit->text());
+    settings->setValue("proxy/password", passwordEdit->text());
+    settings->setValue("page/default", startpageEdit->text());
+    settings->sync();
+    emit settingsChanged();
+    close();
 }
 
 void MySettings::cancelClicked() {
-     close();
+    close();
 }
 
 void MySettings::defaultClicked(bool checked) {
     if (checked) {
-         useProxyBox->setChecked(true);
-         hostnameEdit->setText("172.27.100.5");
-         portEdit->setText("4444");
-         userNameEdit->setText("student.istu");
-         passwordEdit->setText("student");
-         startpageEdit->setText("https://xtenzq.github.io/");
-    }
-    else {
+        useProxyBox->setChecked(true);
+        hostnameEdit->setText("172.27.100.5");
+        portEdit->setText("4444");
+        userNameEdit->setText("student.istu");
+        passwordEdit->setText("student");
+        startpageEdit->setText("https://google.com");
+    } else {
         useProxyBox->setText("");
         hostnameEdit->setText("");
         portEdit->setText("");
