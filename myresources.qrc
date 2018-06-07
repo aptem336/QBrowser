@@ -4,14 +4,12 @@
         <file>exitButton.png</file>
         <file>forward.png</file>
         <file>home.png</file>
-        <file>install.png</file>
         <file>menu.png</file>
         <file>notssl.png</file>
         <file>reload.png</file>
         <file>sourceCode.png</file>
         <file>ssl.png</file>
         <file>stop.png</file>
-        <file>unistall.png</file>
         <file>web.png</file>
     </qresource>
 </RCC>

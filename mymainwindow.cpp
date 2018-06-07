@@ -19,6 +19,7 @@ const QString MyMainWindow::browserName = QString("QBrowser");
 
 MyMainWindow::MyMainWindow(QWidget *parent) : QWidget(parent) {
     progress = 0;
+    setMinimumWidth(900);
     setWindowIcon(QIcon(QStringLiteral(":web.png")));
     setWindowTitle(browserName);
 
@@ -282,18 +283,26 @@ void MyMainWindow::loadFinishedSlot() {
     QStringList names;
     QStringList urls;
     QList<int> counts;
+    QList<QImage> images;
     if (hfile->open(QIODevice::ReadOnly)) {
         QString site_title = webView->title();
         QDataStream read(hfile);
         read>>names;
         read>>urls;
         read>>counts;
+        read>>images;
         if (names.contains(site_title)){
             counts[names.indexOf(site_title)]+=1;
         } else {
             names.append(site_title);
             urls.append(webView->url().toString());
             counts.append(1);
+            QWebFrame *frame = webView->page()->mainFrame();
+            QImage image(webView->width(), webView->height(), QImage::Format_ARGB32);
+            QPainter painter(&image);
+            frame->render(&painter);
+            painter.end();
+            images.append(image);
         }
         hfile->close();
     }
@@ -302,11 +311,9 @@ void MyMainWindow::loadFinishedSlot() {
         write<<names;
         write<<urls;
         write<<counts;
+        write<<images;
         hfile->close();
     }
-//    qDebug()<<names;
-//    qDebug()<<urls;
-//    qDebug()<<counts;
     stopButton->setEnabled(false);
 }
 void MyMainWindow::showWebViewSlot(){

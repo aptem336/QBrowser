@@ -41,7 +41,7 @@ m_clearButton(new QToolButton(this)) {
     QString style(QStringLiteral("QToolButton { border: none; padding: 1px; }"));
     m_clearButton->setStyleSheet(style);
     m_favButton->setStyleSheet(style);
-    setStyleSheet(QStringLiteral("QLineEdit { padding-left: %1px; padding-right: %2px; padding-top: 5px; padding-bottom: 5px; } ")
+    setStyleSheet(QStringLiteral("QLineEdit{padding-left:%1px;padding-right:%2px;padding-top:5px;padding-bottom:5px;}")
             .arg(m_clearButton->sizeHint().width())
             .arg(m_favButton->sizeHint().width()));
     int minIconHeight = qMax(m_favButton->sizeHint().height(), m_clearButton->sizeHint().height());
@@ -82,7 +82,7 @@ void UrlLineEdit::paintEvent(QPaintEvent *e) {
         int progress = value;
         // Отрисовываем сам прогрессбар
         // Устанавливаем ему цвет
-        QColor loadingColor = QColor(0x9a,0xc1,0x6c,0x66);
+        QColor loadingColor = QColor(0x34,0x98,0xdb,0x66);
         painter.setBrush(loadingColor);
         // Границы делаем прозрачными
         painter.setPen(Qt::transparent);
