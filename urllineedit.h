@@ -25,7 +25,7 @@ public:
     void setDeafultIcon();
 
 protected:
-    void resizeEvent(QResizeEvent *event) override;
+    void resizeEvent(QResizeEvent* event) override;
     virtual void paintEvent(QPaintEvent *e);
 
 private:

@@ -12,7 +12,7 @@
  * \brief UrlLineEdit::UrlLineEdit Кастомная реализация элемента QLineEdit
  * \param parent QWidget
  */
-UrlLineEdit::UrlLineEdit(QWidget *parent)
+UrlLineEdit::UrlLineEdit(QWidget* parent)
 : QLineEdit(parent),
 //
 m_favButton(new QToolButton(this)),
@@ -34,7 +34,7 @@ m_clearButton(new QToolButton(this)) {
     setPalette(p);
 
     // Устанавливаем иконку очищения адресной строки
-    m_clearButton->setIcon(QIcon(QStringLiteral(":exitButton.png")));
+    m_clearButton->setIcon(QIcon(QStringLiteral(":clear.png")));
     // По умолчанию (когда адресная строка пуста) она неактивна
     m_clearButton->setVisible(false);
     m_clearButton->setCursor(Qt::ArrowCursor);
@@ -70,7 +70,7 @@ void UrlLineEdit::setWebView(QWebView *webView) {
  * \brief UrlLineEdit::paintEvent Отрисовка элемента UrlLineEdit
  * \param e контекст отрисовки
  */
-void UrlLineEdit::paintEvent(QPaintEvent *e) {
+void UrlLineEdit::paintEvent(QPaintEvent*e) {
     // В начале - отрисовываем сам элемент QLineEdit
     QLineEdit::paintEvent(e);
     QPainter painter(this);
@@ -99,7 +99,7 @@ void UrlLineEdit::paintEvent(QPaintEvent *e) {
  * \brief UrlLineEdit::resizeEvent
  * \param event
  */
-void UrlLineEdit::resizeEvent(QResizeEvent *event) {
+void UrlLineEdit::resizeEvent(QResizeEvent* event) {
     // Отрисовываем оригинальный QLineEdit
     QLineEdit::resizeEvent(event);
     // (для себя) sizeHint() - определяет рекомендованный размер для виджета

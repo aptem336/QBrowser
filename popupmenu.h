@@ -10,11 +10,9 @@ class PopupMenu : public QMenu {
     Q_OBJECT
 public:
     explicit PopupMenu(QPushButton* button, QWidget* parent = 0);
-    void showEvent(QShowEvent* event);
+    void showEvent(QShowEvent*);
 private:
     QPushButton* b;
-protected:
-    // void resizeEvent(QResizeEvent *event);
 };
 
 #endif // POPUPMENU_H

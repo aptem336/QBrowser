@@ -2,12 +2,12 @@
 #include <QPainter>
 #include <QDebug>
 
-MyButton::MyButton(QWidget *parent):QPushButton(parent){}
+MyButton::MyButton(QWidget* parent):QPushButton(parent){}
 
 void MyButton::pushButtonSlot(){
     emit pushButtonSignal(url);
 }
-void MyButton::paintEvent(QPaintEvent *){
+void MyButton::paintEvent(QPaintEvent*){
     QPainter painter(this);
     QRect rect = this->rect();
     QLinearGradient gradient(0,rect.height(),rect.width(),0);

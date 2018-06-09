@@ -392,7 +392,7 @@ void MyMainWindow::slotSourceDownloaded() {
     QTextEdit* textEdit = new QTextEdit(NULL);
     myDialog->setWindowTitle(tr("Source code of ") + (webView->url()).toString());
     myDialog->setAttribute(Qt::WA_DeleteOnClose);
-    myDialog->setWindowIcon(QIcon(QStringLiteral(":sourceCode.png")));
+    myDialog->setWindowIcon(QIcon(QStringLiteral(":source.png")));
 
     QGridLayout *dialogLayout = new QGridLayout();
     dialogLayout->addWidget(textEdit);

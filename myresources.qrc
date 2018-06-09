@@ -1,15 +1,15 @@
 <RCC>
     <qresource prefix="/">
         <file>back.png</file>
-        <file>exitButton.png</file>
         <file>forward.png</file>
         <file>home.png</file>
         <file>menu.png</file>
         <file>notssl.png</file>
         <file>reload.png</file>
-        <file>sourceCode.png</file>
         <file>ssl.png</file>
         <file>stop.png</file>
         <file>web.png</file>
+        <file>clear.png</file>
+        <file>source.png</file>
     </qresource>
 </RCC>
