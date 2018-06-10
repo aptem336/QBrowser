@@ -20,7 +20,7 @@
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
 ; License page
-!insertmacro MUI_PAGE_LICENSE "D:\license.txt"
+!insertmacro MUI_PAGE_LICENSE "D:\QB\license.txt"
 ; Directory page
 !insertmacro MUI_PAGE_DIRECTORY
 ; Instfiles page
@@ -135,6 +135,8 @@ Section Uninstall
 
   RMDir "$SMPROGRAMS\QBrowser"
   RMDir "$INSTDIR"
+  
+  RMDir "$APPDATA\QBrowser"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
