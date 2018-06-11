@@ -10,17 +10,17 @@
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
 ; MUI 1.67 compatible ------
-!include "MUI.nsh"
+!include "MUI2.nsh"
 
 ; MUI Settings
 !define MUI_ABORTWARNING
-!define MUI_ICON "D:\QB\install.ico"
-!define MUI_UNICON "D:\QB\uninstall.ico"
+!define MUI_ICON "QB\install.ico"
+!define MUI_UNICON "QB\uninstall.ico"
 
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
 ; License page
-!insertmacro MUI_PAGE_LICENSE "D:\QB\license.txt"
+!insertmacro MUI_PAGE_LICENSE "QB\license.txt"
 ; Directory page
 !insertmacro MUI_PAGE_DIRECTORY
 ; Instfiles page
@@ -47,33 +47,33 @@ ShowUninstDetails hide
 Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-  File "D:\QB\Qt5Widgets.dll"
-  File "D:\QB\Qt5WebKitWidgets.dll"
-  File "D:\QB\Qt5WebKit.dll"
-  File "D:\QB\Qt5V8.dll"
-  File "D:\QB\Qt5Sql.dll"
-  File "D:\QB\Qt5Quick.dll"
-  File "D:\QB\Qt5Qml.dll"
-  File "D:\QB\Qt5PrintSupport.dll"
-  File "D:\QB\Qt5OpenGL.dll"
-  File "D:\QB\Qt5Network.dll"
-  File "D:\QB\Qt5MultimediaWidgets.dll"
-  File "D:\QB\Qt5Multimedia.dll"
-  File "D:\QB\Qt5Gui.dll"
-  File "D:\QB\Qt5Core.dll"
-  File "D:\QB\mybrowser.exe"
+  File "QB\Qt5Widgets.dll"
+  File "QB\Qt5WebKitWidgets.dll"
+  File "QB\Qt5WebKit.dll"
+  File "QB\Qt5V8.dll"
+  File "QB\Qt5Sql.dll"
+  File "QB\Qt5Quick.dll"
+  File "QB\Qt5Qml.dll"
+  File "QB\Qt5PrintSupport.dll"
+  File "QB\Qt5OpenGL.dll"
+  File "QB\Qt5Network.dll"
+  File "QB\Qt5MultimediaWidgets.dll"
+  File "QB\Qt5Multimedia.dll"
+  File "QB\Qt5Gui.dll"
+  File "QB\Qt5Core.dll"
+  File "QB\mybrowser.exe"
   CreateDirectory "$SMPROGRAMS\QBrowser"
   CreateShortCut "$SMPROGRAMS\QBrowser\QBrowser.lnk" "$INSTDIR\mybrowser.exe" "" "$INSTDIR\\web.ico" 0
   CreateShortCut "$DESKTOP\QBrowser.lnk" "$INSTDIR\mybrowser.exe" "" "$INSTDIR\\web.ico" 0
-  File "D:\QB\libwinpthread-1.dll"
-  File "D:\QB\libstdc++-6.dll"
-  File "D:\QB\libGLESv2.dll"
-  File "D:\QB\libgcc_s_sjlj-1.dll"
-  File "D:\QB\libEGL.dll"
-  File "D:\QB\icuuc49.dll"
-  File "D:\QB\icuin49.dll"
-  File "D:\QB\icudt49.dll"
-  File "D:\QB\web.ico"
+  File "QB\libwinpthread-1.dll"
+  File "QB\libstdc++-6.dll"
+  File "QB\libGLESv2.dll"
+  File "QB\libgcc_s_sjlj-1.dll"
+  File "QB\libEGL.dll"
+  File "QB\icuuc49.dll"
+  File "QB\icuin49.dll"
+  File "QB\icudt49.dll"
+  File "QB\web.ico"
 SectionEnd
 
 Section -AdditionalIcons
@@ -136,6 +136,8 @@ Section Uninstall
   RMDir "$SMPROGRAMS\QBrowser"
   RMDir "$INSTDIR"
   
+  SetShellVarContext all
+  Delete "$APPDATA\QBrowser\settings.ini"
   RMDir "$APPDATA\QBrowser"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
