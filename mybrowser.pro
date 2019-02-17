@@ -6,11 +6,9 @@ TARGET = mybrowser
 TEMPLATE = app
 
 SOURCES += main.cpp\
-    mysettings.cpp \
     mymainwindow.cpp
 
 HEADERS  += \
-    mysettings.h \
     mymainwindow.h
 
 TRANSLATIONS += lang_ru.ts

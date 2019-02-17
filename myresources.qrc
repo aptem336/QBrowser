@@ -3,8 +3,6 @@
         <file>back.png</file>
         <file>forward.png</file>
         <file>reload.png</file>
-        <file>stop.png</file>
         <file>web.png</file>
-        <file>settings.png</file>
     </qresource>
 </RCC>

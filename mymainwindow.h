@@ -11,31 +11,23 @@ class MyMainWindow : public QWidget {
 public:
     MyMainWindow(QWidget *parent = 0);
 private slots:
+    void returnPressedSlot();
+    void linkClickedSlot(QUrl);
+
+    void urlChangedSlot(QUrl);
+    void titleChangedSlot(QString);
+
     void backSlot();
     void forwardSlot();
     void reloadSlot();
-    void stopSlot();
-    void returnPressedSlot();
-    void loadSlot(QUrl);
-    void urlChangedSlot(QUrl);
-    void titleChangedSlot(QString);
-    void loadStartedSlot();
-    void loadFinishedSlot();
-    void settingsOpenSlot();
-    void changeSettings();
 
 private:
     QPushButton *backButton;
-    QPushButton *nextButton;
+    QPushButton *forwardButton;
     QPushButton *reloadButton;
-    QPushButton *stopButton;
-    QPushButton *settingsButton;
 
     QLineEdit *addressLineEdit;
     QWebView *webView;
-
-    QSettings *settings;
-    void readSettings();
 
     const static QString browserName;
 };
