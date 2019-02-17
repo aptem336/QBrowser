@@ -6,22 +6,19 @@
 class MySettings : public QDialog {
     Q_OBJECT
 public:
-    MySettings(QSettings *mysettings, QWidget *parent);
+    MySettings(QSettings *settings, QWidget *parent);
 private:
-    QCheckBox *useDefaultBox;
-    QCheckBox *useProxyBox;
     QLineEdit *hostnameEdit;
     QLineEdit *portEdit;
     QLineEdit *userNameEdit;
     QLineEdit *passwordEdit;
-    QLineEdit *startpageEdit;
+    QCheckBox *useProxy;
     QSettings *settings;
 private slots:
+    void enableChanged(bool);
     void okClicked();
     void cancelClicked();
-    void defaultClicked();
-    void manageButtonsEnabled(bool checked);
-    void defaultClicked(bool checked);
+    void defaultSettings();
 signals:
     void settingsChanged();
 };

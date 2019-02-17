@@ -4,66 +4,40 @@
 #include <QSettings>
 #include <QtWidgets>
 #include <QtWebKitWidgets>
-#include <urllineedit.h>
-#include <htmlhighlighter.h>
-#include <tabpanel.h>
 
 class MyMainWindow : public QWidget {
     Q_OBJECT
 
 public:
     MyMainWindow(QWidget *parent = 0);
-    ~MyMainWindow();
-
-    const static QString browserName;
 private slots:
-    void goButtonClickedSlot();
-    void linkClickedSlot(QUrl);
+    void backSlot();
+    void forwardSlot();
+    void reloadSlot();
+    void stopSlot();
+    void returnPressedSlot();
+    void loadSlot(QUrl);
     void urlChangedSlot(QUrl);
     void titleChangedSlot(QString);
-    void prevButtonClickedSlot();
-    void nextButtonClickedSlot();
-    void refreshButtonClickedSlot();
-    void stopButtonClickedSlot();
     void loadStartedSlot();
     void loadFinishedSlot();
-    void showWebViewSlot();
-    void homeButtonClickedSlot();
-    void closeClickedSlot();
-    void settingsClickedSlot();
-    void loadSettings();
-    void adjustOnProgress();
-    void setProgress(int p);
-
-protected slots:
-    void viewSource();
-    void slotSourceDownloaded();
-
+    void settingsOpenSlot();
+    void changeSettings();
 
 private:
-    // Кнопки
-    QPushButton *prevButton;
+    QPushButton *backButton;
     QPushButton *nextButton;
-    QPushButton *refreshButton;
+    QPushButton *reloadButton;
     QPushButton *stopButton;
-    QPushButton *goButton;
-    QPushButton *homeButton;
-    QPushButton *menuButton;
-    //
-    QPushButton *showBookmarks;
-    //
-    UrlLineEdit *addressBar;
-    QTabWidget *mainPanel;
+    QPushButton *settingsButton;
+
+    QLineEdit *addressLineEdit;
     QWebView *webView;
-    TabPanel *tabsPanel;
 
     QSettings *settings;
-    void openSettings();
-    void qSleep(int ms);
+    void readSettings();
 
-    HtmlHighLighter *m_htmlHightLighter;
-    int progress;
-    QString title;
+    const static QString browserName;
 };
 
 #endif // WIDGET_H
