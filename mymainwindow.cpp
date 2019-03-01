@@ -4,12 +4,10 @@
 #include <QWebHistory>
 #include <QNetworkReply>
 
-const QString MyMainWindow::browserName = QString("QBrowser");
-
-MyMainWindow::MyMainWindow(QWidget *parent) : QWidget(parent) {
+MyMainWindow::MyMainWindow() : QWidget(nullptr) {
     setMinimumWidth(900);
     setWindowIcon(QIcon(QStringLiteral(":web.png")));
-    setWindowTitle(browserName);
+    setWindowTitle("QBrowser");
 
     backButton = new QPushButton();
     backButton->setIcon(QIcon(QStringLiteral(":back.png")));
@@ -27,7 +25,7 @@ MyMainWindow::MyMainWindow(QWidget *parent) : QWidget(parent) {
     forwardButton->setEnabled(false);
     reloadButton->setEnabled(false);
 
-    addressLineEdit = new QLineEdit();
+    addressLineEdit = new ProgressLineEdit();
 
     webView = new QWebView();
     webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
@@ -50,8 +48,8 @@ MyMainWindow::MyMainWindow(QWidget *parent) : QWidget(parent) {
     setLayout(innerLayout);
 
     connect(addressLineEdit, SIGNAL(returnPressed()), this, SLOT(returnPressedSlot()));
+    connect(webView, SIGNAL(loadProgress(int)), addressLineEdit, SLOT(updateProgressSlot(int)));
     connect(webView, SIGNAL(linkClicked(QUrl)), this, SLOT(linkClickedSlot(QUrl)));
-
     connect(webView, SIGNAL(urlChanged(QUrl)), this, SLOT(urlChangedSlot(QUrl)));
     connect(webView, SIGNAL(titleChanged(QString)), this, SLOT(titleChangedSlot(QString)));
 
@@ -64,7 +62,7 @@ MyMainWindow::MyMainWindow(QWidget *parent) : QWidget(parent) {
 
 void MyMainWindow::returnPressedSlot() {
     QString addr = addressLineEdit->text();
-    QRegExp reg("(?:(?:https?|ftp|telnet)://(?:[a-z0-9_-]{1,32}(?::[a-z0-9_-]{1,32})?@)?)?(?:(?:[a-z0-9-]{1,128}.)+(?:ru|su|com|net|org|mil|edu|arpa|gov|biz|info|aero|inc|name|[a-z]{2})|(?!0)(?:(?!0[^.]|255)[0-9]{1,3}.){3}(?!0|255)[0-9]{1,3})(?:/[a-z0-9.,_@%&?+=~/-]*)?(?:#[^ '\"&]*)?");
+    QRegExp reg("_^(?:(?:https?|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?!10(?:\\.\\d{1,3}){3})(?!127(?:\\.\\d{1,3}){3})(?!169\\.254(?:\\.\\d{1,3}){2})(?!192\\.168(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\x{00a1}-\\x{ffff}0-9]+-?)*[a-z\\x{00a1}-\\x{ffff}0-9]+)(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}0-9]+-?)*[a-z\\x{00a1}-\\x{ffff}0-9]+)*(?:\\.(?:[a-z\\x{00a1}-\\x{ffff}]{2,})))(?::\\d{2,5})?(?:/[^\\s]*)?$_iuS");
     if (!reg.exactMatch(addr)) {
         addr = "https://www.google.ru/search?q=" + addr + "&oq=" + addr + "&ie=UTF-8";
     }
@@ -86,7 +84,7 @@ void MyMainWindow::urlChangedSlot(QUrl url) {
 }
 
 void MyMainWindow::titleChangedSlot(QString title) {
-    setWindowTitle(browserName + " :: " + title);
+    setWindowTitle("QBrowser :: " + title);
 }
 
 void MyMainWindow::backSlot(){

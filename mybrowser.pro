@@ -6,10 +6,12 @@ TARGET = mybrowser
 TEMPLATE = app
 
 SOURCES += main.cpp\
-    mymainwindow.cpp
+    mymainwindow.cpp \
+    progresslineedit.cpp
 
 HEADERS  += \
-    mymainwindow.h
+    mymainwindow.h \
+    progresslineedit.h
 
 TRANSLATIONS += lang_ru.ts
 

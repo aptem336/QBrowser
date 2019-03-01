@@ -4,12 +4,13 @@
 #include <QSettings>
 #include <QtWidgets>
 #include <QtWebKitWidgets>
+#include <progresslineedit.h>
 
 class MyMainWindow : public QWidget {
     Q_OBJECT
 
 public:
-    MyMainWindow(QWidget *parent = 0);
+    MyMainWindow();
 private slots:
     void returnPressedSlot();
     void linkClickedSlot(QUrl);
@@ -26,10 +27,8 @@ private:
     QPushButton *forwardButton;
     QPushButton *reloadButton;
 
-    QLineEdit *addressLineEdit;
+    ProgressLineEdit *addressLineEdit;
     QWebView *webView;
-
-    const static QString browserName;
 };
 
 #endif // WIDGET_H
